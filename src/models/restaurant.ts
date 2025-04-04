@@ -1,10 +1,16 @@
-import mongoose from "mongoose"
+import mongoose, { InferSchemaType } from "mongoose"
 
-//  kept seperate as will create seperate schema & seperate ID ,but will be embedded in the restuarant schema. Allow us to easily fetch menu item data based on ID
+//  kept seperate as will create seperate schema & seperate ID ,but will be embedded in the restaurant schema. Allow us to easily fetch menu item data based on ID
 const menuItemSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        required: true, 
+        default: () => new mongoose.Types.ObjectId(), 
+    },
     name: { type: String, required: true},
     price: { type: Number, required: true },
 });
+export type MenuItemType = InferSchemaType<typeof menuItemSchema>;
 
 const restaurantSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

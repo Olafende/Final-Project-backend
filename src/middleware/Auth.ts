@@ -1,5 +1,5 @@
 import { auth } from "express-oauth2-jwt-bearer";
-import {Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
 
@@ -13,40 +13,39 @@ declare global {
 }
 
 export const jwtCheck = auth({
-    audience: process.env.AUTH0_AUDIENCE,
-    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
-    tokenSigningAlg: "RS256",
-  });
-
+  audience: process.env.AUTH0_AUDIENCE,
+  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+  tokenSigningAlg: "RS256",
+});
 
 export const jwtParse = async (
-    req: Request, 
-    res: Response, 
-    next: NextFunction,
-  ) => {
-      const { authorization } = req.headers;
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { authorization } = req.headers;
 
-      if (!authorization || !authorization.startsWith("Bearer ")) {
-        return res.sendStatus(401);
-      }
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return res.sendStatus(401);
+  }
 
-      const token = authorization.split(" ")[1];
-      
-      try {
-        const decoded = jwt.decode(token) as jwt.JwtPayload;
-        const auth0Id = decoded.sub;
+ 
+  const token = authorization.split(" ")[1];
 
-        const user = await User.findOne({ auth0Id });
+  try {
+    const decoded = jwt.decode(token) as jwt.JwtPayload;
+    const auth0Id = decoded.sub;
 
-        if(!user) {
-          return res.sendStatus(401);
-        }
+    const user = await User.findOne({ auth0Id });
 
-        req.auth0Id = auth0Id as string;
-        req.userId = user._id.toString();
-        next();
+    if (!user) {
+      return res.sendStatus(401);
+    }
 
-      } catch (error) {
-        next(error);
-      }
-  };
+    req.auth0Id = auth0Id as string;
+    req.userId = user._id.toString();
+    next();
+  } catch (error) {
+    return res.sendStatus(401);
+  }
+};
